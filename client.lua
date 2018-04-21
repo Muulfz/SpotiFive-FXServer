@@ -63,6 +63,7 @@ ShowNotification = true
             end
         end
         Plylists =  PlaylistsInfos
+        TriggerServerEvent("Spotify:PlayRadioStation", GetPlayerRadioStationIndex())
     end)
 
     RegisterNetEvent("Spotify:Notify")

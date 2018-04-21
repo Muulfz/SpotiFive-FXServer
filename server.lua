@@ -2,6 +2,8 @@ api_key = ""
 name = GetConvar("sv_hostname", "My new fxserver")
 
 Playlists = {}
+
+PlaylistNames = {}
 print(name)
 PerformHttpRequest("https://whogivesashitabout.it:443/fivem/registerserver", function(err,text,headers)
 print(json.encode(headers))
@@ -134,16 +136,46 @@ RegisterCommand("spotify", function(source, args, rawCommand)
 end)
 end, false)
 
+RegisterNetEvent("Spotify:PlayRadioStation")
+AddEventHandler("Spotify:PlayRadioStation", function(radioindex)
+local source = source
+
+
+GetUserToken(GetPlayerIdentifiers(source)[1],source,function(OAuthKey)
+PerformHttpRequest('https://api.spotify.com/v1/me/player', function(statusCode, returned, headers)
+    Citizen.CreateThread(function()
+        local data = json.decode(returned)
+        local Time = data["progress_ms"] / 1000
+        Wait(1000)
+        PerformHttpRequest('https://api.spotify.com/v1/me/player', function(statusCode, returned, headers)
+                local data = json.decode(returned)
+                local Time2 = data["progress_ms"] / 1000
+                if Time == Time2 then
+                    PerformHttpRequest('https://api.spotify.com/v1/me/player/play', function(statusCode, returned, headers)
+
+                    end, 'PUT', '{"context_uri":"'..Playlists[source][radioindex+1].uri..'"}', { ["Content-Type"] = 'application/json', ["Authorization"] = 'Bearer '..OAuthKey })
+                end
+        end, 'GET', '', { ["Content-Type"] = 'application/json', ["Authorization"] = 'Bearer '..OAuthKey })
+    end)
+end, 'GET', '', { ["Content-Type"] = 'application/json', ["Authorization"] = 'Bearer '..OAuthKey })
+end)
+end)
+
+
 RegisterNetEvent("Spotify:GetPlaylists")
 AddEventHandler("Spotify:GetPlaylists",function()
-  GetUserToken(GetPlayerIdentifiers(source)[1],source,function(OAuthKey)
-
+    local source = source
+    GetUserToken(GetPlayerIdentifiers(source)[1],source,function(OAuthKey)
+ 
     PerformHttpRequest("https://api.spotify.com/v1/me/playlists", function(statusCode,returned,headers)
         local data = json.decode(returned)
         local playlistnames = {}
+        Playlists[source]={}
+        PlaylistNames[source]={}
         for k,playlist in pairs(data.items) do
         table.insert( playlistnames, playlist.name)
-        table.insert( Playlists, playlists)
+        table.insert( PlaylistNames[source], playlist.name)
+        table.insert( Playlists[source], playlist)
         end
         TriggerClientEvent("Spotify:GivePlaylists", source, playlistnames,Playlists)
     end, 'GET', '', { ["Content-Type"] = 'application/json', ["Authorization"] = 'Bearer '..OAuthKey })
