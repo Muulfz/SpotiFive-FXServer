@@ -13,10 +13,10 @@ print(err)
     api_key = text.code
     else
         print("------------------------------------------")
-        print("SpotiFive ERROR: COULDN't RETRIEVE A KEY!")
+        print("SpotiFive ERROR: COULDN'T RETRIEVE A KEY!")
         print("------------------------------------------")
     end
-    
+
     end, "POST", json.encode({["name"]=name}),{["Content-Type"]="application/json"})
 
 function GetUserToken(id,serverid,cb)
@@ -39,14 +39,14 @@ if text.success ~= false then
                     token = res.access_token
                     cb(token)
                 else
-                    
+
                     print("SPOTIFIVEM::ERROR::COULDN'T REFRESH TOKEN!")
                     TriggerClientEvent("Spotify:Notify",serverid)
                 end
                 end, "POST", json.encode({["steam"]=id,["identifier"]=api_key}), {["Content-Type"]="application/json"})
         end
     end, 'GET', '', { ["Content-Type"] = 'application/json', ["Authorization"] = 'Bearer '..text.access_token })
-    
+
 else
     PerformHttpRequest("https://whogivesashitabout.it/auth/spotify/refresh", function(err,res,headers)
         res = json.decode(res)
@@ -54,7 +54,7 @@ else
             token = res.access_token
             cb(token)
         else
-            
+
             print("SPOTIFIVEM::ERROR::COULDN'T REFRESH TOKEN!")
             TriggerClientEvent("Spotify:Notify",serverid)
         end
@@ -67,7 +67,7 @@ end
 
 function SecondsToClock(seconds)
     local seconds = tonumber(seconds)
- 
+
     if seconds <= 0 then
         return "00:00:00";
     else
@@ -77,59 +77,96 @@ function SecondsToClock(seconds)
         return mins..":"..secs
     end
 end
- 
+
 RegisterNetEvent("Spotify:GetSongInfo")
 AddEventHandler("Spotify:GetSongInfo", function()
     local Triggerer = source
     GetUserToken(GetPlayerIdentifiers(source)[1],source,function(OAuthKey)
-    PerformHttpRequest('https://api.spotify.com/v1/me/player', function(statusCode, returned, headers)
-        if statusCode == 200 or statusCode == 202  then
-            local data = json.decode(returned)
-            local SpotifyInfo = {SongArtist = data["item"]["artists"][1]["name"], SongName = data["item"]["name"]}
-            TriggerClientEvent("Spotify:GiveSongInfo", Triggerer, SpotifyInfo)
-        else
-            print("An error occured, status code: "..statusCode)
-            print("Full error message:"..returned)
-        end
-    end, 'GET', '', { ["Content-Type"] = 'application/json', ["Authorization"] = 'Bearer '..OAuthKey })
+	    PerformHttpRequest('https://api.spotify.com/v1/me/player', function(statusCode, returned, headers)
+	        if statusCode == 200 or statusCode == 202  then
+	            local data = json.decode(returned)
+	            local SpotifyInfo = {SongArtist = data["item"]["artists"][1]["name"], SongName = data["item"]["name"]}
+	            TriggerClientEvent("Spotify:GiveSongInfo", Triggerer, SpotifyInfo)
+				if parties ~= nil then
+					for i=1,#parties do
+						if parties[i].partyHost == source and SpotifyInfo.SongName ~= then
+						end
+					end
+				end
+	        else
+	            print("An error occured, status code: "..statusCode)
+	            print("Full error message:"..returned)
+	        end
+	    end, 'GET', '', { ["Content-Type"] = 'application/json', ["Authorization"] = 'Bearer '..OAuthKey })
     end)
 end)
- 
+
 function PlaySong(uri, auth)
     PerformHttpRequest('https://api.spotify.com/v1/me/player/play', function(statusCode, returned, headers)
     end, 'PUT', '{"uris":["'..uri..'"]}', { ["Content-Type"] = 'application/json', ["Authorization"] = 'Bearer '..auth })
 end
- 
+
 local parties = {}
- 
+
 RegisterCommand("spotify", function(source, args, rawCommand)
     GetUserToken(GetPlayerIdentifiers(source)[1],source,function(OAuthKey)
-    local option = args[1]
-    local theSource = source
-    if option == 'pause' then
-        PerformHttpRequest('https://api.spotify.com/v1/me/player/pause', function(statusCode, returned, headers)
-        end, 'PUT', '', { ["Content-Type"] = 'application/json', ["Authorization"] = 'Bearer '..OAuthKey })
-        TriggerClientEvent("chat:addMessage", source, { args = { "^2Spotify", "Paused song" } })
-    elseif option == 'cursong' then
-        PerformHttpRequest('https://api.spotify.com/v1/me/player', function(statusCode, returned, headers)
-            local data = json.decode(returned)
-            local SongArtist = data["item"]["artists"][1]["name"]
-            local SongName = data["item"]["name"]
-            local SongUri = data["item"]["uri"]
-            local Time = data["progress_ms"] / 1000
-            TriggerClientEvent("chat:addMessage", source, { args = { "^2Spotify", "Current song: ^3"..SongName.."\n^7Artist: ^3"..SongArtist.."\n^7Time: ^3"..SecondsToClock(Time).."^7\nUri: ^3"..SongUri } })
-        end, 'GET', '', { ["Content-Type"] = 'application/json', ["Authorization"] = 'Bearer '..OAuthKey })
-    elseif option == 'play' then
-        local song = args[2]
-        if song == nil then
-            PerformHttpRequest('https://api.spotify.com/v1/me/player/play', function(statusCode, returned, headers)
-            end, 'PUT', '', { ["Content-Type"] = 'application/json', ["Authorization"] = 'Bearer '..OAuthKey })
-            TriggerClientEvent("chat:addMessage", source, { args = { "^2Spotify", "Playing song" } })
-        else
-            PlaySong(song, OAuthKey)
-        end
-    end
-end)
+	    local option = args[1]
+	    local theSource = source
+	    if option == 'pause' then
+	        PerformHttpRequest('https://api.spotify.com/v1/me/player/pause', function(statusCode, returned, headers)
+	        end, 'PUT', '', { ["Content-Type"] = 'application/json', ["Authorization"] = 'Bearer '..OAuthKey })
+	        TriggerClientEvent("chat:addMessage", source, { args = { "^2Spotify", "Paused song" } })
+	    elseif option == 'cursong' then
+	        PerformHttpRequest('https://api.spotify.com/v1/me/player', function(statusCode, returned, headers)
+	            local data = json.decode(returned)
+	            local SongArtist = data["item"]["artists"][1]["name"]
+	            local SongName = data["item"]["name"]
+	            local SongUri = data["item"]["uri"]
+	            local Time = data["progress_ms"] / 1000
+	            TriggerClientEvent("chat:addMessage", source, { args = { "^2Spotify", "Current song: ^3"..SongName.."\n^7Artist: ^3"..SongArtist.."\n^7Time: ^3"..SecondsToClock(Time).."^7\nUri: ^3"..SongUri } })
+	        end, 'GET', '', { ["Content-Type"] = 'application/json', ["Authorization"] = 'Bearer '..OAuthKey })
+	    elseif option == 'play' then
+	        local song = args[2]
+	        if song == nil then
+	            PerformHttpRequest('https://api.spotify.com/v1/me/player/play', function(statusCode, returned, headers)
+	            end, 'PUT', '', { ["Content-Type"] = 'application/json', ["Authorization"] = 'Bearer '..OAuthKey })
+	            TriggerClientEvent("chat:addMessage", source, { args = { "^2Spotify", "Playing song" } })
+	        else
+	            PlaySong(song, OAuthKey)
+	        end
+		elseif option == "createparty" then
+			local name = args[2]
+			if name ~= nil then
+				for i=1,#parties do
+					if parties[i].partyName == name then
+						TriggerClientEvent("chat:addMessage", source, { args = { "^2Spotify", "A party with that name is already in use!" } })
+						return
+					elseif parties[i].partyHost == source then
+						TriggerClientEvent("chat:addMessage", source, { args = { "^2Spotify", "You are already the host of a party!" } })
+						return
+					end
+				end
+
+				table.insert(parties, {partyName = name, partyHost = source, partyListeners = {}, partySong = "none"})
+				TriggerClientEvent("chat:addMessage", -1, { args = { "^2Spotify", "^3"..GetPlayerName(source).."^7 Created a spotify party! Join using ^2/spotify join "..name.."^7!" } })
+			end
+		elseif option == "join" then
+			local name = args[2]
+			if name ~= nil then
+				for i=1,#parties do
+					for x=1,#parties[i].partyListeners do
+						if parties[i].partyListeners[x] == source then
+							table.remove(parties[i].partyListeners, x)
+						end
+					end
+					if parties[i].partyName == name then
+						table.insert(parties[i].partyListeners, source)
+						TriggerClientEvent("chat:addMessage", source, { args = { "^2Spotify", "You joined the party "..name.."!" } })
+					end
+				end
+			end
+	    end
+	end)
 end, false)
 
 local verFile = LoadResourceFile(GetCurrentResourceName(), "version.json")
