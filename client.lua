@@ -62,7 +62,7 @@ end
                 PopScaleformMovieFunctionVoid()
             end
            
-            DrawText2D("~g~Spotify:~s~ Song: ~o~"..SongData.SongName.."~s~ Artist: ~o~"..SongData.SongArtist, 0.37, 0.1)
+            DrawText2D("~g~Spotify:~s~ Song: ~o~"..SongData.SongName.."~s~ Artist: ~o~"..SongData.SongArtist, 0.02, 0.02)
            
         end
     end
