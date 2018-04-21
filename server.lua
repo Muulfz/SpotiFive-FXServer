@@ -1,5 +1,7 @@
 api_key = ""
 name = GetConvar("sv_hostname", "My new fxserver")
+
+Playlists = {}
 print(name)
 PerformHttpRequest("https://whogivesashitabout.it:443/fivem/registerserver", function(err,text,headers)
 print(json.encode(headers))
@@ -131,6 +133,22 @@ RegisterCommand("spotify", function(source, args, rawCommand)
     end
 end)
 end, false)
+
+RegisterNetEvent("Spotify:GetPlaylists")
+AddEventHandler("Spotify:GetPlaylists",function()
+  GetUserToken(GetPlayerIdentifiers(source)[1],source,function(OAuthKey)
+
+    PerformHttpRequest("https://api.spotify.com/v1/me/playlists", function(statusCode,returned,headers)
+        local data = json.decode(returned)
+        local playlistnames = {}
+        for k,playlist in pairs(data.items) do
+        table.insert( playlistnames, playlist.name)
+        table.insert( Playlists, playlists)
+        end
+        TriggerClientEvent("Spotify:GivePlaylists", source, playlistnames,Playlists)
+    end, 'GET', '', { ["Content-Type"] = 'application/json', ["Authorization"] = 'Bearer '..OAuthKey })
+  end)
+end)
 
 local verFile = LoadResourceFile(GetCurrentResourceName(), "version.json")
 local curVersion = json.decode(verFile).version
