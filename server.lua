@@ -87,10 +87,12 @@ AddEventHandler("Spotify:GetSongInfo", function()
     local Triggerer = source
     GetUserToken(GetPlayerIdentifiers(source)[1],source,function(OAuthKey)
     PerformHttpRequest('https://api.spotify.com/v1/me/player', function(statusCode, returned, headers)
-        if statusCode == 200 or statusCode == 202  then
+        if statusCode == 200 then
             local data = json.decode(returned)
             local SpotifyInfo = {SongArtist = data["item"]["artists"][1]["name"], SongName = data["item"]["name"]}
             TriggerClientEvent("Spotify:GiveSongInfo", Triggerer, SpotifyInfo)
+        elseif statusCode == 202 then
+        -- the user hasn't opened spotify at the moment
         else
             print("An error occured, status code: "..statusCode)
             print("Full error message:"..returned)
