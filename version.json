@@ -1,4 +1,4 @@
 {
-    "version":"1.2",
-    "changelog":"Added radio wheel selection"
+    "version":"1.3",
+    "changelog":"Fixed bug when users didn't have spotify open"
 }
