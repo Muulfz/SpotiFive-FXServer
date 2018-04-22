@@ -139,7 +139,8 @@ end, false)
 RegisterNetEvent("Spotify:PlayRadioStation")
 AddEventHandler("Spotify:PlayRadioStation", function(radioindex)
 local source = source
-
+print(radioindex)
+if Playlists[source][radioindex+1] ~= nil then
 
 GetUserToken(GetPlayerIdentifiers(source)[1],source,function(OAuthKey)
 PerformHttpRequest('https://api.spotify.com/v1/me/player', function(statusCode, returned, headers)
@@ -152,13 +153,14 @@ PerformHttpRequest('https://api.spotify.com/v1/me/player', function(statusCode, 
                 local Time2 = data["progress_ms"] / 1000
                 if Time == Time2 then
                     PerformHttpRequest('https://api.spotify.com/v1/me/player/play', function(statusCode, returned, headers)
-
-                    end, 'PUT', '{"context_uri":"'..Playlists[source][radioindex+1].uri..'"}', { ["Content-Type"] = 'application/json', ["Authorization"] = 'Bearer '..OAuthKey })
+                        print(returned)
+                    end, 'PUT', json.encode({["context_uri"]=Playlists[source][radioindex+1].uri,["offset"]={["position"]=0}}), { ["Content-Type"] = 'application/json', ["Authorization"] = 'Bearer '..OAuthKey })
                 end
         end, 'GET', '', { ["Content-Type"] = 'application/json', ["Authorization"] = 'Bearer '..OAuthKey })
     end)
 end, 'GET', '', { ["Content-Type"] = 'application/json', ["Authorization"] = 'Bearer '..OAuthKey })
 end)
+end
 end)
 
 
