@@ -22,6 +22,8 @@ Citizen.CreateThread(function()
 
     Plylists = {}
 
+    LastRadioIndex = GetPlayerRadioStationIndex()
+
 ShowNotification = true
     function DrawText2D(text, x, y)
         SetTextFont(0)
@@ -63,7 +65,10 @@ ShowNotification = true
             end
         end
         Plylists =  PlaylistsInfos
+        if LastRadioIndex ~= GetPlayerRadioStationIndex() then
         TriggerServerEvent("Spotify:PlayRadioStation", GetPlayerRadioStationIndex())
+        end
+        LastRadioIndex = GetPlayerRadioStationIndex()
     end)
 
     RegisterNetEvent("Spotify:Notify")
